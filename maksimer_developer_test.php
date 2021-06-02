@@ -1,3 +1,25 @@
+<style>
+    div.events div.event {
+        margin-bottom: 20px;
+    }
+
+    div.events div.event h3 {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    div.events div.event div.info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    div.events div.event p.sold-out {
+        color: red;
+    }
+</style>
+
 <?php
 
 /*
@@ -14,6 +36,16 @@ function debug(): void
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
+}
+
+function country_from_code(string $country_code) {
+    $names = json_decode(file_get_contents(__DIR__ . "/country_codes.json"), true);
+
+    if (!$names[$country_code]) {
+        return $country_code;
+    } else {
+        return $names[$country_code];
+    }
 }
 
 function basic_auth(string $username, string $password): string
@@ -59,6 +91,20 @@ class PimsVenue extends APIObject
     public string $label;
     public string $city;
     public string $country_code;
+    public string $country;
+
+    public function __construct(object $object)
+    {
+        parent::__construct($object);
+        $this->country = country_from_code($this->country_code);
+    }
+
+    public static function get(int $id): PimsVenue
+    {
+        return new PimsVenue(
+            pims_get("venues/$id")
+        );
+    }
 }
 
 class PimsEvent extends APIObject
@@ -72,14 +118,57 @@ class PimsEvent extends APIObject
     public int $costing_capacity;
     public ?string $sold_out_date;
 
-    public function get_venue(): PimsVenue
+    public PimsVenue $venue;
+
+    public function __construct(object $object)
     {
-        $venue_response = pims_get("venues/$this->venue_id");
-        return new PimsVenue($venue_response);
+        parent::__construct($object);
+    }
+
+    public function display(): string
+    {
+        $venue = PimsVenue::get($this->venue_id);
+        $sold_out_message = "";
+
+        if ($this->sold_out_date) {
+            $sold_out_date = date_create($this->sold_out_date);
+            $sold_out_date_formatted = date_format($sold_out_date, "F jS Y");
+            $sold_out_message = "<p class='sold-out'>Sold out! ($sold_out_date_formatted)</p>";
+        }
+
+        return sprintf('
+            <div class="event">
+                <h3 title="%1$s">%1$s</h3>
+                <div class="info">      
+                    <small>%2$s</small>
+                    <small>%3$s, %4$s</small>
+                </div>
+                <p>Price: %5$d %6$s</p>
+                %7$s
+            </div>
+        ',
+            $this->label,
+            $this->formatted_datetime(),
+            $venue->city,
+            $venue->country,
+            $this->costing_capacity,
+            $this->currency,
+            $sold_out_message
+        );
+    }
+
+    /**
+     * @return string
+     * Example output: October 22nd 2021
+     */
+    public function formatted_datetime(): string
+    {
+        $datetime = date_create($this->datetime);
+        return date_format($datetime, "F jS Y");
     }
 }
 
-function shortcode_events(): string
+function events(): string
 {
     // Display all errors (for debugging, probably remove in production)
     debug();
@@ -87,7 +176,16 @@ function shortcode_events(): string
     $events_response = pims_get("events");
     $events = pims_embedded_events($events_response);
 
-    return "<p>.</p>";
+    $events_html = join(
+        PHP_EOL,
+        array_map(fn($event) => $event->display(), $events)
+    );
+
+    return sprintf('
+        <div class="events">
+            %s
+        </div>
+    ', $events_html);
 }
 
-add_shortcode("events", "shortcode_events");
+add_shortcode("events", "events");
