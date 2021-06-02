@@ -1,0 +1,5 @@
+{
+    "require": {
+        "pimssas/pims-api-client-php": "dev-master"
+    }
+}
