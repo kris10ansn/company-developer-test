@@ -33,15 +33,6 @@ use Pims\Api\Endpoint;
 use Pims\Api\Exception\ClientException;
 
 
-/*
- * Plugin Name: [company name] Developer Test
- * Plugin URI: http://maksimer.no
- * Description: [company name] Developer Test shortcode plugin
- * Version: 0.0.1
- * Author: Kristian Silli Nessa
- * Author URI: http://github.com/kris10ansn
-*/
-
 function format_date(string $date, string $format)
 {
     $date_object = date_create($date);
