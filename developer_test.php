@@ -76,6 +76,10 @@
         visibility: hidden;
         background: transparent;
     }
+
+    [hidden] {
+        display: none !important;
+    }
 </style>
 
 
