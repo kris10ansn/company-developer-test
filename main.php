@@ -75,6 +75,27 @@ function unsave_event(int $user_id, $save_id): bool
     return false;
 }
 
+function nav_button(string $dir, string $href): string
+{
+    $align = $dir === 'prev' ? 'alignleft' : 'alignright';
+    $button_text = $dir === 'prev' ? 'Previous' : 'Next';
+
+    return "
+        <div class='nav-$dir $align'>
+            <a href='$href'>
+                <button>$button_text</button>
+            </a>
+        </div>
+    ";
+}
+
+function nav_link(string $dir, int $page): string
+{
+    return add_query_arg([
+            EVENT_PAGE_KEY => $page + ($dir === 'prev' ? -1 : 1)
+    ], $_SERVER['REQUEST_URI']);
+}
+
 /**
  * @throws ClientException
  */
@@ -166,25 +187,17 @@ function events_shortcode(): string
 
     $events_response = $client->getAll(Endpoint::EVENTS, $args);
 
-    $events = $events_response->getResource('events');
-    $page_count = $events_response->getProperty('page_count');
-
-    $next_link = add_query_arg([EVENT_PAGE_KEY => $page + 1], $_SERVER['REQUEST_URI']);
-    $prev_link = add_query_arg([EVENT_PAGE_KEY => $page - 1], $_SERVER['REQUEST_URI']);
-
     ob_start();
+
+    echo styles();
 
     echo "<div id='events'>";
 
-    $save_id = $_POST[EVENT_SAVE_KEY] ?? NULL;
-    if ($save_id && is_user_logged_in()) {
-        save_event(get_current_user_id(), $save_id);
-    }
+    if (isset($_POST[EVENT_SAVE_KEY]) && is_user_logged_in())
+        save_event(get_current_user_id(), $_POST[EVENT_SAVE_KEY] ?? NULL);
 
-    $unsave_id = $_POST[EVENT_UNSAVE_KEY] ?? NULL;
-    if ($unsave_id && is_user_logged_in()) {
-        unsave_event(get_current_user_id(), $unsave_id);
-    }
+    if (isset($_POST[EVENT_UNSAVE_KEY]) && is_user_logged_in())
+        unsave_event(get_current_user_id(), $_POST[EVENT_UNSAVE_KEY] ?? NULL);
 
     $option = fn (string $value, string $label, string $current_option)
         => "<option value='$value' " . selected_if($current_option === $value)  ." >$label</option>";
@@ -224,34 +237,25 @@ function events_shortcode(): string
         </details>
         ";
 
-    foreach ($events as $event) {
+    foreach ($events_response->getResource('events') as $event) {
         echo "<hr>";
         echo  display_event($event, $client);
     }
     echo "<hr>";
 
-    if ($events_response->hasLink('prev')) {
-        echo "<div class='nav-previous alignleft'>
-                  <a href='$prev_link'>
-                      <button>Previous</button>
-                  </a>
-              </div>";
-    }
+    if ($events_response->hasLink('prev'))
+        echo nav_button('prev', nav_link('prev', $page));
 
-    if ($events_response->hasLink('next')) {
-        echo "<div class='nav-next alignright'>
-                  <a href='$next_link'>
-                      <button>Next</button>
-                  </a>
-              </div>";
-    }
+    if ($events_response->hasLink('next'))
+        echo nav_button('next', nav_link('next', $page));
 
+    $page_count = $events_response->getProperty('page_count');
 
     echo "<div class='aligncenter'>
               Page $page of $page_count
           </div>";
 
-    echo "</div>";
+    echo "</div>"; // div#events
 
     return ob_get_clean();
 }
