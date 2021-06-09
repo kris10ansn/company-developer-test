@@ -224,8 +224,6 @@ function display_event(HalResource $event, Client $client): string
  */
 function events_shortcode(): string
 {
-    debug();
-
     // Public sandbox credentials (https://api.pims.io/)
     $client = new Client(
         "https://sandbox.pims.io/api",
