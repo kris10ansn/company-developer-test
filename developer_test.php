@@ -231,7 +231,6 @@ function display_event(HalResource $event, Client $client): string
  */
 function events_shortcode(): string
 {
-    global $wp_query;
     debug();
 
     // Public sandbox credentials (https://api.pims.io/)
