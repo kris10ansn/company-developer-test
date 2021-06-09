@@ -350,9 +350,5 @@ function events_shortcode(): string
     return ob_get_clean();
 }
 
-function removable_query_args() {
-
-}
-
 add_filter('query_vars', 'query_vars_filter');
 add_shortcode("events", "events_shortcode");
