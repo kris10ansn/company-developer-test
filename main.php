@@ -120,16 +120,13 @@ function display_event(HalResource $event, Client $client): string
 
     $save_button = "";
 
-    if (is_user_logged_in() && !event_is_saved($id, get_current_user_id())) {
-        $save_button = "
-            <input type='number' hidden name='".EVENT_SAVE_KEY."' value='$id'>
-            <input type='submit' value='💾' >
-        ";
-    } else if (is_user_logged_in()) {
-        $save_button = "
-            <input type='number' hidden name='".EVENT_UNSAVE_KEY."' value='$id'>
-            <input type='submit' value='❌'>
-        ";
+    if (is_user_logged_in()) {
+        $save_button = event_is_saved($id, get_current_user_id()) ?
+            "<input type='number' hidden name='" . EVENT_UNSAVE_KEY . "' value='$id'>
+             <input type='submit' value='❌'>"
+            :
+            "<input type='number' hidden name='" . EVENT_SAVE_KEY . "' value='$id'>
+             <input type='submit' value='💾' >";
     }
 
     return "
@@ -142,15 +139,11 @@ function display_event(HalResource $event, Client $client): string
             </div>
             
             <div class='info'>
-                <p>
-                    {$venue->getProperty('label')}
-                    <i>({$venue->getProperty('city')}, $country)</i>
-                </p>
+                <p>{$venue->getProperty('label')} <i>({$venue->getProperty('city')}, $country)</i></p>
                 <p>$datetime_date</p>
             </div>
             
             <p><i>Time:</i> $datetime_time</p>
-            
             <p>$price_information</p>
         </div>
     ";
@@ -190,7 +183,6 @@ function events_shortcode(): string
     ob_start();
 
     echo styles();
-
     echo "<div id='events'>";
 
     if (isset($_POST[EVENT_SAVE_KEY]) && is_user_logged_in())
