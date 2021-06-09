@@ -163,8 +163,8 @@ function events_shortcode(): string
         "v1"
     );
 
-    $page = get_query_var(EVENT_PAGE_KEY, 1);
-    $page_size = get_query_var(EVENT_PAGE_SIZE_KEY, 25);
+    $page = intval(get_query_var(EVENT_PAGE_KEY, 1));
+    $page_size = intval(get_query_var(EVENT_PAGE_SIZE_KEY, 25));
     $order = get_query_var(EVENT_SORT_ORDER_KEY, "");
     $sort = get_query_var(EVENT_SORT_KEY,"label");
     $date_from = get_query_var(EVENT_DATE_FROM_KEY, "");
