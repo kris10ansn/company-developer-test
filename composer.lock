@@ -209,27 +209,27 @@
         },
         {
             "name": "jsor/hal-client",
-            "version": "v3.4.2",
+            "version": "v3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jsor/hal-client.git",
-                "reference": "b6d31209df58cc90962504ef7a82d90777a3b423"
+                "reference": "0a26104764aedef2cf2d3bdd2b084dc468d9f7a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jsor/hal-client/zipball/b6d31209df58cc90962504ef7a82d90777a3b423",
-                "reference": "b6d31209df58cc90962504ef7a82d90777a3b423",
+                "url": "https://api.github.com/repos/jsor/hal-client/zipball/0a26104764aedef2cf2d3bdd2b084dc468d9f7a3",
+                "reference": "0a26104764aedef2cf2d3bdd2b084dc468d9f7a3",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "guzzlehttp/psr7": "^1.0",
-                "php": ">=5.4",
+                "php": "^7.2",
                 "psr/http-message": "^1.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.0",
                 "guzzlehttp/guzzle": "^5.0||^6.0",
-                "phpunit/phpunit": "^4.8.10||^5.0"
+                "phpunit/phpunit": "^8.1"
             },
             "suggest": {
                 "guzzlehttp/guzzle": "For using Guzzle as your HTTP client"
@@ -263,9 +263,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jsor/hal-client/issues",
-                "source": "https://github.com/jsor/hal-client/tree/v3.4.2"
+                "source": "https://github.com/jsor/hal-client/tree/master"
             },
-            "time": "2017-03-10T18:57:42+00:00"
+            "time": "2020-02-18T20:01:06+00:00"
         },
         {
             "name": "pimssas/pims-api-client-php",
