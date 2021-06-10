@@ -7,9 +7,9 @@
  * Author URI: http://github.com/kris10ansn
 */
 
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 require_once 'constants.php';
-require 'util.php';
+require_once 'util.php';
 
 use Jsor\HalClient\HalResource;
 use Pims\Api\Client;
