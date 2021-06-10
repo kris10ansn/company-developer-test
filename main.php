@@ -40,60 +40,6 @@ function query_vars_filter($vars)
     return $vars;
 }
 
-function was_saved($event_id): bool
-{
-    return is_user_logged_in() && ($_POST[EVENT_SAVE_KEY] ?? NULL) == $event_id;
-}
-
-function was_unsaved($event_id): bool
-{
-    return is_user_logged_in() && ($_POST[EVENT_UNSAVE_KEY] ?? NULL) == $event_id;
-}
-
-function event_is_saved($event_id, int $user_id): bool
-{
-    $saved_posts = get_user_meta($user_id, USERMETA_SAVED_EVENTS_KEY);
-    return in_array($event_id, $saved_posts);
-}
-
-function save_event(int $user_id, $save_id): bool
-{
-    if (!event_is_saved($save_id, $user_id)) {
-        if (add_user_meta($user_id, USERMETA_SAVED_EVENTS_KEY, intval($save_id)))
-            return true;
-    }
-    return false;
-}
-
-function unsave_event(int $user_id, $save_id): bool
-{
-    if (event_is_saved($save_id, $user_id)) {
-        return delete_user_meta($user_id, USERMETA_SAVED_EVENTS_KEY, intval($save_id));
-    }
-    return false;
-}
-
-function nav_button(string $dir, string $href): string
-{
-    $align = $dir === Client::PAGINATION_NEXT ? 'alignright' : 'alignleft';
-    $button_text = $dir === Client::PAGINATION_NEXT ? 'Next' : 'Previous';
-
-    return "
-        <div class='nav-$dir $align'>
-            <a href='$href'>
-                <button>$button_text</button>
-            </a>
-        </div>
-    ";
-}
-
-function nav_link(string $dir, int $page): string
-{
-    return add_query_arg([
-        EVENT_PAGE_KEY => $page + ($dir === Client::PAGINATION_NEXT ? 1 : -1)
-    ], $_SERVER['REQUEST_URI']);
-}
-
 function display_event(HalResource $event): string
 {
     $id = $event->getProperty('id');
@@ -113,19 +59,22 @@ function display_event(HalResource $event): string
         $price_information = "<b><s>$price</s> <span class='red'>SOLD OUT ($sold_out_date)</span></b>";
     }
 
-    $save_button = "";
-
-    if (is_user_logged_in()) {
-        $save_button = event_is_saved($id, get_current_user_id()) ?
+    $save_button = is_user_logged_in() ?
+        event_is_saved($id, get_current_user_id()) ?
             "<input type='number' hidden name='" . EVENT_UNSAVE_KEY . "' value='$id'>
              <input type='submit' value='❌'>"
             :
             "<input type='number' hidden name='" . EVENT_SAVE_KEY . "' value='$id'>
-             <input type='submit' value='💾' >";
-    }
+             <input type='submit' value='💾' >"
+        :
+        "";
+
+    $classes = implode(' ',
+        ['event', string_if(was_saved($id), 'saved'), string_if(was_unsaved($id), 'unsaved')]
+    );
 
     return "
-        <div class='event " . string_if(was_saved($id), "saved") . ' ' . string_if(was_unsaved($id), "unsaved") . "' id='$id'>
+        <div class='$classes' id='$id'>
             <div class='top'>
                 <h3>{$event->getProperty('label')}</h3>
                 <form action='#$id' method='POST'>
@@ -173,7 +122,7 @@ function events_shortcode(): string
         'venue_country' => 'Venue country'
     ];
 
-    // Validation of input
+    // Validering av bruker-input
     if (!in_array($sort, array_keys($sort_options)))
         $sort = 'label';
     if (!in_array($order, ['', '-']))
@@ -205,6 +154,10 @@ function events_shortcode(): string
     $option = fn (string $value, string $label, string $current_option)
                 => "<option value='$value' " . selected_if($current_option === $value)  . " >$label</option>";
 
+    $sort_option_elements = implode(' ',
+        associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))
+    );
+
     echo "
         <details>
             <summary>Search parameters</summary>
@@ -213,7 +166,7 @@ function events_shortcode(): string
                 <label for='sort'>Sorting</label>
                 <select name='" . EVENT_SORT_KEY . "' id='sort'>
                     <option selected disabled hidden>Sort by...</option>"
-                    . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
+                    . $sort_option_elements . "
                 </select>
                 <select name='" . EVENT_SORT_ORDER_KEY . "'>"
                     . $option('', 'Ascending', $order)
@@ -247,10 +200,10 @@ function events_shortcode(): string
     // https://github.com/pimssas/pims-api-client-php/pull/49
     if ($events_response->hasLink(Client::PAGINATION_PREVIOUS))
         echo nav_button(Client::PAGINATION_PREVIOUS, nav_link(Client::PAGINATION_PREVIOUS, $page));
-
     if ($events_response->hasLink(Client::PAGINATION_NEXT))
         echo nav_button(Client::PAGINATION_NEXT, nav_link(Client::PAGINATION_NEXT, $page));
 
+    // I tilfelle GET-parameter har feil
     $current_page = $events_response->getProperty('page');
     $page_count = $events_response->getProperty('page_count');
 
@@ -263,15 +216,17 @@ function events_shortcode(): string
     return ob_get_clean();
 }
 
-add_action(
-    'wp_enqueue_scripts',
-    fn () => wp_enqueue_style('events-shortcode-style', plugins_url('styles.css', __FILE__))
-);
+function enqueue_styles() {
+    wp_enqueue_style('events-shortcode-style', plugins_url('styles.css', __FILE__));
+}
+
+add_action('wp_enqueue_scripts', 'enqueue_styles');
 add_filter('query_vars', 'query_vars_filter');
-add_shortcode('events', function () {
-    try {
-        return events_shortcode();
-    } catch(Exception $e) {
-        echo 'ERROR ' . $e->getCode();
-    }
-});
+
+add_shortcode(
+    'events',
+    try_catch(
+        'events_shortcode',
+        fn ($e) => 'ERROR ' . $e->getCode()
+    )
+);
