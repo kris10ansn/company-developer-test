@@ -16,8 +16,6 @@ use Pims\Api\Client;
 use Pims\Api\Endpoint;
 use Pims\Api\Exception\ClientException;
 
-require_once 'constants.php';
-
 function display_event(HalResource $event): string
 {
     $id = $event->getProperty('id');
