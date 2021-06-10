@@ -77,8 +77,8 @@ function unsave_event(int $user_id, $save_id): bool
 
 function nav_button(string $dir, string $href): string
 {
-    $align = $dir === 'prev' ? 'alignleft' : 'alignright';
-    $button_text = $dir === 'prev' ? 'Previous' : 'Next';
+    $align = $dir === Client::PAGINATION_NEXT ? 'alignright' : 'alignleft';
+    $button_text = $dir === Client::PAGINATION_NEXT ? 'Next' : 'Previous';
 
     return "
         <div class='nav-$dir $align'>
@@ -92,7 +92,7 @@ function nav_button(string $dir, string $href): string
 function nav_link(string $dir, int $page): string
 {
     return add_query_arg([
-            EVENT_PAGE_KEY => $page + ($dir === 'prev' ? -1 : 1)
+            EVENT_PAGE_KEY => $page + ($dir === Client::PAGINATION_NEXT ? 1 : -1)
     ], $_SERVER['REQUEST_URI']);
 }
 
@@ -153,15 +153,15 @@ function events_shortcode(): string
 {
     // Public sandbox credentials (https://api.pims.io/)
     $client = new Client(
-        "https://sandbox.pims.io/api",
-        "sandbox",
-        "c5jI1ABi8d0x87oWfVzvXALqkf0hToGq",
-        "en",
-        "v1"
+        'https://sandbox.pims.io/api',
+        'sandbox',
+        'c5jI1ABi8d0x87oWfVzvXALqkf0hToGq',
+        'en',
+        'v1'
     );
 
     $page = intval(get_query_var(EVENT_PAGE_KEY, 1));
-    $page_size = intval(get_query_var(EVENT_PAGE_SIZE_KEY, 10));
+    $page_size = intval(get_query_var(EVENT_PAGE_SIZE_KEY, 25));
     $order = get_query_var(EVENT_SORT_ORDER_KEY, '');
     $sort = get_query_var(EVENT_SORT_KEY,'label');
     $date_from = get_query_var(EVENT_DATE_FROM_KEY, '');
@@ -190,7 +190,7 @@ function events_shortcode(): string
         'page_size' => $page_size,
         'from_datetime' => string_if(!empty($date_from), format_datestring($date_from, 'Y-m-d?H:i:s')),
         'to_datetime' => string_if(!empty($date_to), format_datestring($date_to, 'Y-m-d?H:i:s')),
-        'expand' => '*'
+        'expand' => '_embedded{venue}'
     ]);
 
     ob_start();
@@ -243,16 +243,19 @@ function events_shortcode(): string
     }
     echo "<hr>";
 
+    // The constant Client::PAGINATION_PREVIOUS is set to 'previous'
+    // (probably a bug, opened a pull request https://github.com/pimssas/pims-api-client-php/pull/49)
     if ($events_response->hasLink('prev'))
         echo nav_button('prev', nav_link('prev', $page));
 
-    if ($events_response->hasLink('next'))
-        echo nav_button('next', nav_link('next', $page));
+    if ($events_response->hasLink(Client::PAGINATION_NEXT))
+        echo nav_button(Client::PAGINATION_NEXT, nav_link(Client::PAGINATION_NEXT, $page));
 
+    $current_page = $events_response->getProperty('page');
     $page_count = $events_response->getProperty('page_count');
 
     echo "<div class='aligncenter'>
-              Page $page of $page_count
+              Page $current_page of $page_count
           </div>";
 
     echo "</div>"; // div#events
