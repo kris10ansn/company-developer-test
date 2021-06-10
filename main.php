@@ -96,9 +96,6 @@ function nav_link(string $dir, int $page): string
     ], $_SERVER['REQUEST_URI']);
 }
 
-/**
- * @throws ClientException
- */
 function display_event(HalResource $event, Client $client): string
 {
     $id = $event->getProperty('id');
@@ -107,7 +104,7 @@ function display_event(HalResource $event, Client $client): string
     $datetime_date = format_date($datetime, "F jS Y");
     $datetime_time = format_date($datetime, "H:i");
 
-    $venue = $client->getOne(Endpoint::VENUES, $event->getProperty('venue_id'));
+    $venue = $event->getFirstResource('venue');
     $country = country_from_code($venue->getProperty('country_code'));
 
     $price = "{$event->getProperty('costing_capacity')} {$event->getProperty('currency')}";
@@ -165,20 +162,33 @@ function events_shortcode(): string
 
     $page = intval(get_query_var(EVENT_PAGE_KEY, 1));
     $page_size = intval(get_query_var(EVENT_PAGE_SIZE_KEY, 10));
-    $order = get_query_var(EVENT_SORT_ORDER_KEY, "");
-    $sort = get_query_var(EVENT_SORT_KEY,"label");
-    $date_from = get_query_var(EVENT_DATE_FROM_KEY, "");
-    $date_to = get_query_var(EVENT_DATE_TO_KEY, "");
+    $order = get_query_var(EVENT_SORT_ORDER_KEY, '');
+    $sort = get_query_var(EVENT_SORT_KEY,'label');
+    $date_from = get_query_var(EVENT_DATE_FROM_KEY, '');
+    $date_to = get_query_var(EVENT_DATE_TO_KEY, '');
 
-    $args = [
-        "page" => $page,
-        "sort" => $order . $sort,
-        "page_size" => $page_size,
-        "from_datetime" => string_if(!empty($date_from), format_date($date_from, "Y-m-d?H:i:s")),
-        "to_datetime" => string_if(!empty($date_to), format_date($date_to, "Y-m-d?H:i:s")),
+    $sort_options = [
+        'label' => 'Label',
+        'datetime' => 'Date',
+        'venue_label' => 'Venue name',
+        'venue_city' => 'Venue city',
+        'venue_country' => 'Venue country'
     ];
 
-    $events_response = $client->getAll(Endpoint::EVENTS, $args);
+    if (!in_array($sort, array_keys($sort_options)))
+        $sort = 'label';
+
+    if (!in_array($order, ['', '-']))
+        $order = '';
+
+    $events_response = $client->getAll(Endpoint::EVENTS, [
+        'page' => $page,
+        'sort' => $order . $sort,
+        'page_size' => $page_size,
+        'from_datetime' => string_if(!empty($date_from), format_date($date_from, 'Y-m-d?H:i:s')),
+        'to_datetime' => string_if(!empty($date_to), format_date($date_to, 'Y-m-d?H:i:s')),
+        'expand' => '*'
+    ]);
 
     ob_start();
 
@@ -202,16 +212,11 @@ function events_shortcode(): string
                 <label for='sort'>Sorting</label>
                 <select name='" . EVENT_SORT_KEY . "' id='sort'>
                     <option selected disabled hidden>Sort by...</option>"
-                    . $option("label", "Label", $sort)
-                    . $option("datetime", "Date", $sort)
-                    . $option("venue_label", "Venue name", $sort)
-                    . $option("venue_city", "Venue city", $sort)
-                    . $option("venue_country", "Venue country", $sort)
-                    . "
+                    . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
                 </select>
                 <select name='" . EVENT_SORT_ORDER_KEY . "'>"
-                    . $option("", "Ascending", $order)
-                    . $option("-", "Descending", $order) . "
+                    . $option('', 'Ascending', $order)
+                    . $option('-', 'Descending', $order) . "
                 </select>
                 <label for='page_size'>Page size</label>
                 <input type='number' min='1' name='". EVENT_PAGE_SIZE_KEY ."' id='page_size' value='$page_size'>

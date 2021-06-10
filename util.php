@@ -34,3 +34,12 @@ function format_date(string $date, string $format): string
     $date_object = date_create($date);
     return date_format($date_object, $format);
 }
+
+function associative_map(array $associative_array, callable $callback): array
+{
+    array_walk($associative_array, function (&$value, $key) use($callback) {
+        $value = $callback($key, $value);
+    });
+
+    return $associative_array;
+}
