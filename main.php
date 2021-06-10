@@ -177,9 +177,12 @@ function events_shortcode(): string
 
     if (!in_array($sort, array_keys($sort_options)))
         $sort = 'label';
-
     if (!in_array($order, ['', '-']))
         $order = '';
+    if (format_date($date_from, 'Y-m-d') !== $date_from)
+        $date_from = '';
+    if (format_date($date_to, 'Y-m-d') !== $date_to)
+        $date_to = '';
 
     $events_response = $client->getAll(Endpoint::EVENTS, [
         'page' => $page,
