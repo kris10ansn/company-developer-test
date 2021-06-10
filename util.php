@@ -38,7 +38,7 @@ function format_datestring(string $date, string $format): string
 
 function associative_map(array $associative_array, callable $callback): array
 {
-    array_walk($associative_array, function (&$value, $key) use($callback) {
+    array_walk($associative_array, function (&$value, $key) use ($callback) {
         $value = $callback($key, $value);
     });
 

@@ -28,7 +28,8 @@ const EVENT_UNSAVE_KEY = "unsave_event";
 const EVENT_DATE_FROM_KEY = "events_date_from";
 const EVENT_DATE_TO_KEY = "events_date_to";
 
-function query_vars_filter($vars) {
+function query_vars_filter($vars)
+{
     $vars[] = EVENT_PAGE_KEY;
     $vars[] = EVENT_PAGE_SIZE_KEY;
     $vars[] = EVENT_SORT_KEY;
@@ -90,7 +91,7 @@ function nav_button(string $dir, string $href): string
 function nav_link(string $dir, int $page): string
 {
     return add_query_arg([
-            EVENT_PAGE_KEY => $page + ($dir === Client::PAGINATION_NEXT ? 1 : -1)
+        EVENT_PAGE_KEY => $page + ($dir === Client::PAGINATION_NEXT ? 1 : -1)
     ], $_SERVER['REQUEST_URI']);
 }
 
@@ -125,7 +126,7 @@ function display_event(HalResource $event): string
     }
 
     return "
-        <div class='event ". string_if(was_saved($id), "saved") . ' ' . string_if(was_unsaved($id), "unsaved") ."' id='$id'>
+        <div class='event " . string_if(was_saved($id), "saved") . ' ' . string_if(was_unsaved($id), "unsaved") . "' id='$id'>
             <div class='top'>
                 <h3>{$event->getProperty('label')}</h3>
                 <form action='#$id' method='POST'>
@@ -161,7 +162,7 @@ function events_shortcode(): string
     $page = intval(get_query_var(EVENT_PAGE_KEY, 1));
     $page_size = intval(get_query_var(EVENT_PAGE_SIZE_KEY, 25));
     $order = get_query_var(EVENT_SORT_ORDER_KEY, '');
-    $sort = get_query_var(EVENT_SORT_KEY,'label');
+    $sort = get_query_var(EVENT_SORT_KEY, 'label');
     $date_from = get_query_var(EVENT_DATE_FROM_KEY, '');
     $date_to = get_query_var(EVENT_DATE_TO_KEY, '');
 
@@ -204,7 +205,7 @@ function events_shortcode(): string
         unsave_event(get_current_user_id(), $_POST[EVENT_UNSAVE_KEY] ?? NULL);
 
     $option = fn (string $value, string $label, string $current_option)
-        => "<option value='$value' " . selected_if($current_option === $value)  ." >$label</option>";
+    => "<option value='$value' " . selected_if($current_option === $value)  . " >$label</option>";
 
     echo "
         <details>
@@ -214,31 +215,32 @@ function events_shortcode(): string
                 <label for='sort'>Sorting</label>
                 <select name='" . EVENT_SORT_KEY . "' id='sort'>
                     <option selected disabled hidden>Sort by...</option>"
-                    . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
+        . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
                 </select>
                 <select name='" . EVENT_SORT_ORDER_KEY . "'>"
-                    . $option('', 'Ascending', $order)
-                    . $option('-', 'Descending', $order) . "
+        . $option('', 'Ascending', $order)
+        . $option('-', 'Descending', $order) . "
                 </select>
                 <label for='page_size'>Page size</label>
-                <input type='number' min='1' name='". EVENT_PAGE_SIZE_KEY ."' id='page_size' value='$page_size'>
+                <input type='number' min='1' name='" . EVENT_PAGE_SIZE_KEY . "' id='page_size' value='$page_size'>
                 
                 <label>From date to date:</label>
                 <div class='dates'>
-                    <input type='date' name='".EVENT_DATE_FROM_KEY ."' value='$date_from'>
-                    <input type='date' name='".EVENT_DATE_TO_KEY ."' value='$date_to'>
+                    <input type='date' name='" . EVENT_DATE_FROM_KEY . "' value='$date_from'>
+                    <input type='date' name='" . EVENT_DATE_TO_KEY . "' value='$date_to'>
                 </div>
                 
                 <!-- Set the page to 1 when updating sorting parameters -->
-                <input type='number' name='". EVENT_PAGE_KEY ."' value='1' hidden>
+                <input type='number' name='" . EVENT_PAGE_KEY . "' value='1' hidden>
                 <button type='submit'>Go</button>
             </form>
         </details>
         ";
 
-    echo implode(' ',
+    echo implode(
+        ' ',
         array_map(
-            fn($event) => '<hr>' . display_event($event),
+            fn ($event) => '<hr>' . display_event($event),
             $events_response->getResource('events')
         )
     );

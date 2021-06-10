@@ -4,7 +4,7 @@ function styles(): string
 {
     ob_start();
 
-    ?>
+?>
 
     <style>
         div#events div.event div.info {
@@ -33,13 +33,13 @@ function styles(): string
         div#events div.event.saved {
             background: rgba(0, 255, 0, 0.5);
         }
+
         div#events div.event.unsaved {
             background: rgba(255, 0, 0, 0.5);
         }
 
         div#events div.event.saved,
-        div#events div.event.unsaved
-        {
+        div#events div.event.unsaved {
             animation: background-removal 1s forwards;
         }
 
@@ -53,8 +53,7 @@ function styles(): string
         }
 
         div#events form input,
-        div#events form select
-        {
+        div#events form select {
             margin: 0 0 10px;
         }
 
@@ -79,7 +78,7 @@ function styles(): string
         [id]::before {
             content: '';
             display: block;
-            height:      75px;
+            height: 75px;
             margin-top: -75px;
             visibility: hidden;
             background: transparent;
@@ -90,8 +89,7 @@ function styles(): string
         }
     </style>
 
-    <?php
+<?php
 
     return ob_get_clean();
 }
-
