@@ -205,7 +205,7 @@ function events_shortcode(): string
         unsave_event(get_current_user_id(), $_POST[EVENT_UNSAVE_KEY] ?? NULL);
 
     $option = fn (string $value, string $label, string $current_option)
-    => "<option value='$value' " . selected_if($current_option === $value)  . " >$label</option>";
+                => "<option value='$value' " . selected_if($current_option === $value)  . " >$label</option>";
 
     echo "
         <details>
@@ -215,11 +215,11 @@ function events_shortcode(): string
                 <label for='sort'>Sorting</label>
                 <select name='" . EVENT_SORT_KEY . "' id='sort'>
                     <option selected disabled hidden>Sort by...</option>"
-        . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
+                    . implode(' ', associative_map($sort_options, fn ($value, $label) => $option($value, $label, $sort))) . "
                 </select>
                 <select name='" . EVENT_SORT_ORDER_KEY . "'>"
-        . $option('', 'Ascending', $order)
-        . $option('-', 'Descending', $order) . "
+                    . $option('', 'Ascending', $order)
+                    . $option('-', 'Descending', $order) . "
                 </select>
                 <label for='page_size'>Page size</label>
                 <input type='number' min='1' name='" . EVENT_PAGE_SIZE_KEY . "' id='page_size' value='$page_size'>

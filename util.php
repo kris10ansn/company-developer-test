@@ -17,7 +17,7 @@ function selected_if(bool $bool): string
     return string_if($bool, "selected");
 }
 
-function country_from_code(string $country_code)
+function country_from_code(string $country_code): string
 {
     // http://country.io/names.json
     $names = json_decode(file_get_contents(__DIR__ . "/country_codes.json"), true);
