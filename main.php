@@ -244,10 +244,9 @@ function events_shortcode(): string
     );
     echo '<hr>';
 
-    // The constant Client::PAGINATION_PREVIOUS is set to 'previous'
-    // (probably a bug, opened a pull request https://github.com/pimssas/pims-api-client-php/pull/49)
-    if ($events_response->hasLink('prev'))
-        echo nav_button('prev', nav_link('prev', $page));
+    // https://github.com/pimssas/pims-api-client-php/pull/49
+    if ($events_response->hasLink(Client::PAGINATION_PREVIOUS))
+        echo nav_button(Client::PAGINATION_PREVIOUS, nav_link(Client::PAGINATION_PREVIOUS, $page));
 
     if ($events_response->hasLink(Client::PAGINATION_NEXT))
         echo nav_button(Client::PAGINATION_NEXT, nav_link(Client::PAGINATION_NEXT, $page));
