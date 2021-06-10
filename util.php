@@ -19,6 +19,7 @@ function selected_if(bool $bool): string
 
 function country_from_code(string $country_code)
 {
+    // http://country.io/names.json
     $names = json_decode(file_get_contents(__DIR__ . "/country_codes.json"), true);
 
     if (!$names[$country_code]) {
