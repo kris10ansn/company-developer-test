@@ -10,7 +10,6 @@
 
 require __DIR__ . "/vendor/autoload.php";
 require "util.php";
-require "styles.php";
 
 use Jsor\HalClient\HalResource;
 use Pims\Api\Client;
@@ -196,7 +195,6 @@ function events_shortcode(): string
 
     ob_start();
 
-    echo styles();
     echo '<div id="events">';
 
     if (isset($_POST[EVENT_SAVE_KEY]) && is_user_logged_in())
@@ -266,6 +264,10 @@ function events_shortcode(): string
     return ob_get_clean();
 }
 
+add_action(
+    'wp_enqueue_scripts',
+    fn () => wp_enqueue_style('events-shortcode-style', plugins_url('styles.css', __FILE__))
+);
 add_filter('query_vars', 'query_vars_filter');
 add_shortcode('events', function () {
     try {
