@@ -265,4 +265,10 @@ function events_shortcode(): string
 }
 
 add_filter('query_vars', 'query_vars_filter');
-add_shortcode("events", "events_shortcode");
+add_shortcode('events', function () {
+    try {
+        return events_shortcode();
+    } catch(Exception $e) {
+        echo 'ERROR ' . $e->getCode();
+    }
+});
