@@ -183,10 +183,7 @@ function events_shortcode(): string
     $current_page = $events_response->getProperty('page');
     $page_count = $events_response->getProperty('page_count');
 
-    echo "<div class='aligncenter'>
-              Page $current_page of $page_count
-          </div>";
-
+    echo "<div class='aligncenter'>Page $current_page of $page_count</div>";
     echo "</div>"; // div#events
 
     return ob_get_clean();
