@@ -29,7 +29,7 @@ function country_from_code(string $country_code)
 }
 
 
-function format_date(string $date, string $format): string
+function format_datestring(string $date, string $format): string
 {
     $date_object = date_create($date);
     return date_format($date_object, $format);

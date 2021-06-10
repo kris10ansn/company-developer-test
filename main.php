@@ -101,8 +101,8 @@ function display_event(HalResource $event, Client $client): string
     $id = $event->getProperty('id');
 
     $datetime = $event->getProperty('datetime');
-    $datetime_date = format_date($datetime, "F jS Y");
-    $datetime_time = format_date($datetime, "H:i");
+    $datetime_date = format_datestring($datetime, "F jS Y");
+    $datetime_time = format_datestring($datetime, "H:i");
 
     $venue = $event->getFirstResource('venue');
     $country = country_from_code($venue->getProperty('country_code'));
@@ -111,7 +111,7 @@ function display_event(HalResource $event, Client $client): string
     $price_information = "<b>$price</b>";
 
     if ($event->getProperty('sold_out_date')) {
-        $sold_out_date = format_date($event->getProperty('sold_out_date'), 'd-m-Y');
+        $sold_out_date = format_datestring($event->getProperty('sold_out_date'), 'd-m-Y');
         $price_information = "<b><s>$price</s> <span class='red'>SOLD OUT ($sold_out_date)</span></b>";
     }
 
@@ -179,17 +179,17 @@ function events_shortcode(): string
         $sort = 'label';
     if (!in_array($order, ['', '-']))
         $order = '';
-    if (format_date($date_from, 'Y-m-d') !== $date_from)
+    if (format_datestring($date_from, 'Y-m-d') !== $date_from)
         $date_from = '';
-    if (format_date($date_to, 'Y-m-d') !== $date_to)
+    if (format_datestring($date_to, 'Y-m-d') !== $date_to)
         $date_to = '';
 
     $events_response = $client->getAll(Endpoint::EVENTS, [
         'page' => $page,
         'sort' => $order . $sort,
         'page_size' => $page_size,
-        'from_datetime' => string_if(!empty($date_from), format_date($date_from, 'Y-m-d?H:i:s')),
-        'to_datetime' => string_if(!empty($date_to), format_date($date_to, 'Y-m-d?H:i:s')),
+        'from_datetime' => string_if(!empty($date_from), format_datestring($date_from, 'Y-m-d?H:i:s')),
+        'to_datetime' => string_if(!empty($date_to), format_datestring($date_to, 'Y-m-d?H:i:s')),
         'expand' => '*'
     ]);
 
