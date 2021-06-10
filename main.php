@@ -7,37 +7,16 @@
  * Author URI: http://github.com/kris10ansn
 */
 
-require __DIR__ . "/vendor/autoload.php";
-require "util.php";
+require __DIR__ . '/vendor/autoload.php';
+require_once 'constants.php';
+require 'util.php';
 
 use Jsor\HalClient\HalResource;
 use Pims\Api\Client;
 use Pims\Api\Endpoint;
 use Pims\Api\Exception\ClientException;
 
-const USERMETA_SAVED_EVENTS_KEY = "saved_events";
-
-const EVENT_PAGE_KEY = "events_page";
-const EVENT_PAGE_SIZE_KEY = "events_page_size";
-const EVENT_SORT_KEY = "events_sort";
-const EVENT_SORT_ORDER_KEY = "events_sort_order";
-const EVENT_SAVE_KEY = "save_event";
-const EVENT_UNSAVE_KEY = "unsave_event";
-const EVENT_DATE_FROM_KEY = "events_date_from";
-const EVENT_DATE_TO_KEY = "events_date_to";
-
-function query_vars_filter($vars)
-{
-    $vars[] = EVENT_PAGE_KEY;
-    $vars[] = EVENT_PAGE_SIZE_KEY;
-    $vars[] = EVENT_SORT_KEY;
-    $vars[] = EVENT_SORT_ORDER_KEY;
-    $vars[] = EVENT_SAVE_KEY;
-    $vars[] = EVENT_UNSAVE_KEY;
-    $vars[] = EVENT_DATE_FROM_KEY;
-    $vars[] = EVENT_DATE_TO_KEY;
-    return $vars;
-}
+require_once 'constants.php';
 
 function display_event(HalResource $event): string
 {
@@ -218,6 +197,20 @@ function events_shortcode(): string
 function enqueue_styles() {
     wp_enqueue_style('events-shortcode-style', plugins_url('styles.css', __FILE__));
 }
+
+function query_vars_filter($vars)
+{
+    $vars[] = EVENT_PAGE_KEY;
+    $vars[] = EVENT_PAGE_SIZE_KEY;
+    $vars[] = EVENT_SORT_KEY;
+    $vars[] = EVENT_SORT_ORDER_KEY;
+    $vars[] = EVENT_SAVE_KEY;
+    $vars[] = EVENT_UNSAVE_KEY;
+    $vars[] = EVENT_DATE_FROM_KEY;
+    $vars[] = EVENT_DATE_TO_KEY;
+    return $vars;
+}
+
 
 add_action('wp_enqueue_scripts', 'enqueue_styles');
 add_filter('query_vars', 'query_vars_filter');

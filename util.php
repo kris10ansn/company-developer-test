@@ -1,5 +1,7 @@
 <?php
 
+require_once 'constants.php';
+
 use Pims\Api\Client;
 
 function debug(): void
