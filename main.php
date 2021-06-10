@@ -17,7 +17,6 @@ use Pims\Api\Client;
 use Pims\Api\Endpoint;
 use Pims\Api\Exception\ClientException;
 
-
 const USERMETA_SAVED_EVENTS_KEY = "saved_events";
 
 const EVENT_PAGE_KEY = "events_page";
@@ -40,7 +39,6 @@ function query_vars_filter($vars) {
     $vars[] = EVENT_DATE_TO_KEY;
     return $vars;
 }
-
 
 function was_saved($event_id): bool
 {
@@ -96,7 +94,7 @@ function nav_link(string $dir, int $page): string
     ], $_SERVER['REQUEST_URI']);
 }
 
-function display_event(HalResource $event, Client $client): string
+function display_event(HalResource $event): string
 {
     $id = $event->getProperty('id');
 
@@ -111,7 +109,7 @@ function display_event(HalResource $event, Client $client): string
     $price_information = "<b>$price</b>";
 
     if ($event->getProperty('sold_out_date')) {
-        $sold_out_date = format_datestring($event->getProperty('sold_out_date'), 'd-m-Y');
+        $sold_out_date = format_datestring($event->getProperty('sold_out_date'), 'F jS Y');
         $price_information = "<b><s>$price</s> <span class='red'>SOLD OUT ($sold_out_date)</span></b>";
     }
 
@@ -175,6 +173,7 @@ function events_shortcode(): string
         'venue_country' => 'Venue country'
     ];
 
+    // Validation of input
     if (!in_array($sort, array_keys($sort_options)))
         $sort = 'label';
     if (!in_array($order, ['', '-']))
@@ -183,6 +182,7 @@ function events_shortcode(): string
         $date_from = '';
     if (format_datestring($date_to, 'Y-m-d') !== $date_to)
         $date_to = '';
+    //
 
     $events_response = $client->getAll(Endpoint::EVENTS, [
         'page' => $page,
@@ -196,11 +196,10 @@ function events_shortcode(): string
     ob_start();
 
     echo styles();
-    echo "<div id='events'>";
+    echo '<div id="events">';
 
     if (isset($_POST[EVENT_SAVE_KEY]) && is_user_logged_in())
         save_event(get_current_user_id(), $_POST[EVENT_SAVE_KEY] ?? NULL);
-
     if (isset($_POST[EVENT_UNSAVE_KEY]) && is_user_logged_in())
         unsave_event(get_current_user_id(), $_POST[EVENT_UNSAVE_KEY] ?? NULL);
 
@@ -237,11 +236,13 @@ function events_shortcode(): string
         </details>
         ";
 
-    foreach ($events_response->getResource('events') as $event) {
-        echo "<hr>";
-        echo  display_event($event, $client);
-    }
-    echo "<hr>";
+    echo implode(' ',
+        array_map(
+            fn($event) => '<hr>' . display_event($event),
+            $events_response->getResource('events')
+        )
+    );
+    echo '<hr>';
 
     // The constant Client::PAGINATION_PREVIOUS is set to 'previous'
     // (probably a bug, opened a pull request https://github.com/pimssas/pims-api-client-php/pull/49)
