@@ -1,7 +1,6 @@
 <?php
 /*
  * Plugin Name: [company name] Developer Test
- * Plugin URI: http://maksimer.no
  * Description: [company name] Developer Test shortcode plugin
  * Version: 0.0.1
  * Author: Kristian Silli Nessa
