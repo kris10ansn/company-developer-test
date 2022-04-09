@@ -10,10 +10,10 @@ Plugin should register a shortcode with output that contains:
 -   Link to main page where event are listed (first page) called "Home"
 -   Links to previous and next page of events
 -   List of events with the following info:
-    _ Name (label)
-    _ Date and time of the event
-    _ Price (costing_capacity) and currency
-    _ Venue name, city and country \* Display a "Sold out" message if the event is sold out (use sold_out_date).
+    -   Name (label)
+    -   Date and time of the event
+    -   Price (costing_capacity) and currency
+    -   Venue name, city and country \* Display a "Sold out" message if the event is sold out (use sold_out_date).
 
 Add possibility to use search parameters for:
 
