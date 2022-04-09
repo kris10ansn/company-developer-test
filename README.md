@@ -2,6 +2,8 @@
 
 A developer test I did when in communication with a company. This repo was originally created only for me to be able to work on the project on multiple machines, but I thought I'd make it public (excuse my messy commit history).
 
+Comments are in norwegian as this was for a norwegian company
+
 While working on this I also ended up creating [this pull request](https://github.com/pimssas/pims-api-client-php/pull/49) to fix a bug in the [Pims PHP API client repo](https://github.com/pimssas/pims-api-client-php/) ([link to issue](https://github.com/pimssas/pims-api-client-php/issues/48)).
 
 ## Provided specifications
